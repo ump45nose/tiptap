@@ -1,5 +1,17 @@
 # Change Log
 
+## 3.31.4
+
+### Patch Changes
+
+- 4d56526: Prevent extra CSS declarations from being rendered from editor content.
+- Updated dependencies [4d56526]
+- Updated dependencies [7c089f2]
+- Updated dependencies [6f14bee]
+- Updated dependencies [182cba2]
+- Updated dependencies [7f9a867]
+  - @tiptap/core@3.31.4
+
 ## 3.31.3
 
 ### Patch Changes

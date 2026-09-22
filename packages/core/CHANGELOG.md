@@ -1,5 +1,16 @@
 # Change Log
 
+## 3.31.4
+
+### Patch Changes
+
+- 4d56526: Prevent extra CSS declarations from being rendered from editor content.
+- 7c089f2: Atom block directives (`:::name {…} :::`) indented by up to 3 spaces are now tokenized, matching CommonMark indentation rules for block constructs.
+- 6f14bee: Numeric HTML entities (`&#39;`, `&#x27;`) are now decoded when parsing markdown, instead of showing up as literal text in the editor.
+- 182cba2: Bind `parseMarkdown` and `renderMarkdown` to the configured extension so hooks can read `this.options` and `this.name` without an Editor.
+- 7f9a867: Stop joinItemForward and joinItemBackward from joining across isolating nodes.
+  - @tiptap/pm@3.31.4
+
 ## 3.31.3
 
 ### Patch Changes
