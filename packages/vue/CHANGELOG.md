@@ -1,5 +1,40 @@
 # Change Log
 
+## 4.0.0-next.0
+
+### Major Changes
+
+- dceb48f: Vue 2 support is removed. `@tiptap/vue-3` is now `@tiptap/vue`, and `@tiptap/extension-drag-handle-vue-3` is now `@tiptap/extension-drag-handle-vue`.
+
+  Update imports and dependencies:
+
+  ```diff
+  - import { EditorContent } from '@tiptap/vue-3'
+  + import { EditorContent } from '@tiptap/vue'
+
+  - import DragHandle from '@tiptap/extension-drag-handle-vue-3'
+  + import DragHandle from '@tiptap/extension-drag-handle-vue'
+  ```
+
+  Vue 2 users must migrate to Vue 3 before using the new packages. The planned Codemod Registry package `@tiptap/codemod-v3-to-v4` updates package imports and dependencies.
+
+### Patch Changes
+
+- Updated dependencies [548216e]
+- Updated dependencies [8aea2ef]
+- Updated dependencies [c4488ba]
+- Updated dependencies [2fab93e]
+- Updated dependencies [3451d10]
+- Updated dependencies [17ec9ff]
+- Updated dependencies [5c7200d]
+- Updated dependencies [a90921e]
+- Updated dependencies [fd086c5]
+- Updated dependencies [6520e58]
+- Updated dependencies [32c048d]
+- Updated dependencies [3f111e9]
+  - @tiptap/core@4.0.0-next.0
+  - @tiptap/pm@4.0.0-next.0
+
 ## 3.30.3
 
 ### Patch Changes
