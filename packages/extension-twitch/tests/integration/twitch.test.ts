@@ -255,6 +255,27 @@ describe('extension-twitch', () => {
     getEditorEl()?.remove()
   })
 
+  it('does not insert a bare twitch.tv URL that has no video, clip or channel', () => {
+    editor = new Editor({
+      element: createEditorEl(),
+      extensions: [Document, Text, Paragraph, Twitch],
+    })
+
+    for (const src of [
+      'https://www.twitch.tv/',
+      'https://www.twitch.tv/?filter=archives',
+      'https://twitch.tv/',
+    ]) {
+      expect(editor.commands.setTwitchVideo({ src })).toBe(false)
+    }
+
+    expect(editor.getHTML()).not.toContain('data-twitch-video')
+    expect(editor.getHTML()).not.toContain('Invalid Twitch URL')
+
+    editor?.destroy()
+    getEditorEl()?.remove()
+  })
+
   it('handles video URL with search parameters', () => {
     editor = new Editor({
       element: createEditorEl(),
