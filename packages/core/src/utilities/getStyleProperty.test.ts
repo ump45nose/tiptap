@@ -50,4 +50,19 @@ describe('getStyleProperty', () => {
 
     expect(getStyleProperty(el, 'font-size')).toBe('16px')
   })
+
+  it('keeps semicolons inside quoted font-family values', () => {
+    const el = document.createElement('span')
+    el.setAttribute('style', 'font-family: "Times; New Roman", serif')
+
+    expect(getStyleProperty(el, 'font-family')).toBe('"Times; New Roman", serif')
+  })
+
+  it('does not treat a semicolon inside a quoted content value as a separator', () => {
+    const el = document.createElement('span')
+    el.setAttribute('style', 'color: red; content: "a; color: blue"')
+
+    expect(getStyleProperty(el, 'color')).toBe('red')
+    expect(getStyleProperty(el, 'content')).toBe('"a; color: blue"')
+  })
 })
