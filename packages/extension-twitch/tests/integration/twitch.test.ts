@@ -26,6 +26,11 @@ describe('extension-twitch', () => {
     'https://twitch.google.com/videos/1234567890',
     'https://twitch.com.bad/videos/1234567890',
     'https://www.twtich.tv/videos/1234567890',
+    // bare domain / query-only Twitch URLs cannot produce an embed (#8699)
+    'https://www.twitch.tv/',
+    'https://www.twitch.tv/?filter=archives',
+    'https://twitch.tv/',
+    'https://clips.twitch.tv/',
   ]
 
   invalidUrls.forEach(url => {
@@ -250,6 +255,26 @@ describe('extension-twitch', () => {
     })
 
     expect(result).toBe(false)
+
+    editor?.destroy()
+    getEditorEl()?.remove()
+  })
+
+  it.each([
+    'https://www.twitch.tv/',
+    'https://www.twitch.tv/?filter=archives',
+    'https://clips.twitch.tv/',
+  ])('rejects bare Twitch URLs that cannot produce an embed (%s)', src => {
+    editor = new Editor({
+      element: createEditorEl(),
+      extensions: [Document, Text, Paragraph, Twitch],
+    })
+
+    const result = editor.commands.setTwitchVideo({ src })
+
+    expect(result).toBe(false)
+    expect(editor.getHTML()).not.toContain('data-twitch-video')
+    expect(editor.getHTML()).not.toContain('Invalid Twitch URL')
 
     editor?.destroy()
     getEditorEl()?.remove()
