@@ -2,9 +2,11 @@ import Code from '@tiptap/extension-code'
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
+import { EditorState, Plugin, PluginKey } from '@tiptap/pm/state'
 import { afterEach, describe, expect, it } from 'vite-plus/test'
 
 import { Editor } from './Editor.js'
+import { Extension } from './Extension.js'
 import { Node } from './Node.js'
 
 // minimal stand-in for a mention-like node. inline atoms expand to %leaf% (6 chars)
@@ -109,5 +111,62 @@ describe('input rules with inline atom nodes', () => {
 
     expect(handled).toBe(true)
     expect(editor.getHTML()).toContain('<code>code</code>')
+  })
+})
+
+describe('input rules with appendTransaction doc rewrites (#8709)', () => {
+  let editor: Editor
+
+  afterEach(() => {
+    editor.destroy()
+  })
+
+  it('still applies the rule when appendTransaction changes the doc after typing', () => {
+    // Simulates UniqueID-style plugins: after the typed character is inserted,
+    // appendTransaction sets a node attribute so the live doc no longer equals
+    // the plugin-free inputTransaction.doc that the rule was prepared against.
+    const ParagraphWithProbe = Paragraph.extend({
+      addAttributes() {
+        return {
+          ...this.parent?.(),
+          probe: { default: null },
+        }
+      },
+    })
+
+    const attrAppendExtension = Extension.create({
+      name: 'attrAppend',
+      addProseMirrorPlugins() {
+        return [
+          new Plugin({
+            key: new PluginKey('attrAppend'),
+            appendTransaction: (
+              _trs: readonly unknown[],
+              _old: EditorState,
+              newState: EditorState,
+            ) => {
+              const firstChild = newState.doc.firstChild
+
+              if (!firstChild || firstChild.attrs.probe === 'x') {
+                return null
+              }
+
+              return newState.tr.setNodeAttribute(0, 'probe', 'x')
+            },
+          }),
+        ]
+      },
+    })
+
+    editor = new Editor({
+      extensions: [Document, ParagraphWithProbe, Text, Code, attrAppendExtension],
+      content: '<p>some `code</p>',
+    })
+
+    const handled = typeAtEndOfParagraph(editor, '`')
+
+    expect(handled).toBe(true)
+    expect(editor.getHTML()).toContain('<code>code</code>')
+    expect(editor.getHTML()).not.toMatch(/`code`/)
   })
 })

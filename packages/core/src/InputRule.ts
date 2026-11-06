@@ -166,7 +166,61 @@ function applyRule(config: {
   if (inputTransaction) {
     view.dispatch(inputTransaction)
 
+    // When another plugin's appendTransaction rewrites the document after the
+    // typed text is inserted, the pre-built rule transaction is based on a
+    // stale plugin-free doc and must not be applied as-is (#8709 / #8708).
+    // Rebuild the rule steps against the live editor state instead of bailing
+    // and leaving the input-rule marker text in the document.
     if (!view.state.doc.eq(inputTransaction.doc)) {
+      const liveTr = view.state.tr
+      const liveState = createChainableState({
+        state: view.state,
+        transaction: liveTr,
+      })
+      // After typing, the selection head is at the end of the inserted text
+      // (possibly remapped by appendTransaction). Derive the match range from
+      // that head so the handler sees the same matched span.
+      const liveTo = view.state.selection.from
+      const liveFrom = liveTo - match[0].length
+      const $parentStart = view.state.doc.resolve(liveTo).start()
+
+      if (liveFrom < $parentStart) {
+        return true
+      }
+
+      const liveRange = { from: liveFrom, to: liveTo }
+      const liveCommands = new CommandManager({
+        editor,
+        state: liveState,
+      })
+
+      const liveHandler = rule.handler({
+        state: liveState,
+        range: liveRange,
+        match,
+        commands: liveCommands.commands,
+        chain: liveCommands.chain,
+        can: liveCommands.can,
+      })
+
+      if (liveHandler === null || !liveTr.steps.length) {
+        return true
+      }
+
+      closeHistory(liveTr)
+      liveTr.setMeta('inputRule', true)
+
+      if (rule.undoable) {
+        liveTr.setMeta(plugin, {
+          transform: liveTr,
+          from: liveFrom,
+          to: liveTo,
+          // Typed text is already in the live doc; undo only inverts the rule.
+          text: '',
+        })
+      }
+
+      view.dispatch(liveTr)
       return true
     }
   }
